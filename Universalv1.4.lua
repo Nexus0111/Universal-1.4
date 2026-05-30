@@ -1,4 +1,4 @@
--- ND Script v1.4 - Settings, External, Others, Executor
+-- ND Script v1.4.1 - Mobile Tab Fix + Pill Button Fix
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -13,9 +13,9 @@ local isMobile = UserInputService.TouchEnabled and not UserInputService.Keyboard
 
 -- Settings
 local settings = {
-    theme = "BlackWhite", -- BlackWhite, Red, Blue, Green, Purple, Gold
-    buttonSize = 1, -- 1 = Normal, 2 = Large, 3 = Huge
-    guiSize = 1, -- 1 = Normal, 2 = Large
+    theme = "BlackWhite",
+    buttonSize = 1,
+    guiSize = 1,
     animations = true,
 }
 
@@ -104,27 +104,29 @@ gui.Parent = game.CoreGui
 
 -- Discord notification
 StarterGui:SetCore("SendNotification", {
-    Title = "ND Script v1.4",
+    Title = "ND Script v1.4.1",
     Text = "discord.gg/8ycCx8PQb",
     Duration = 8,
 })
 
--- ==================== PILL BUTTON (MOBILE) ====================
+-- ==================== PILL BUTTON (MOBILE) - FIXED ====================
 local pillButton = nil
 local main = nil
 
 if isMobile then
     pillButton = Instance.new("TextButton")
-    pillButton.Size = UDim2.new(0, 120, 0, 32)
-    pillButton.Position = UDim2.new(0.5, -60, 0, 10)
-    pillButton.BackgroundColor3 = currentTheme.TopBar
+    pillButton.Size = UDim2.new(0, 140, 0, 36)
+    pillButton.Position = UDim2.new(0.5, -70, 0, 8)
+    pillButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     pillButton.BorderSizePixel = 0
-    pillButton.Text = "ND SCRIPT"
-    pillButton.TextColor3 = currentTheme.Accent
-    pillButton.TextSize = 12
+    pillButton.Text = "ND SCRIPT v1.4"
+    pillButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    pillButton.TextSize = 13
     pillButton.Font = Enum.Font.SourceSansBold
     pillButton.ZIndex = 1000
     pillButton.AutoButtonColor = false
+    pillButton.Active = true
+    pillButton.Selectable = true
     pillButton.Parent = gui
     
     local pillCorner = Instance.new("UICorner")
@@ -132,41 +134,21 @@ if isMobile then
     pillCorner.Parent = pillButton
     
     local pillStroke = Instance.new("UIStroke")
-    pillStroke.Color = currentTheme.Accent
-    pillStroke.Thickness = 1
+    pillStroke.Color = Color3.fromRGB(255, 255, 255)
+    pillStroke.Thickness = 1.5
     pillStroke.Parent = pillButton
     
-    if settings.animations then
-        local pillTweenIn = TweenService:Create(pillButton, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 124, 0, 34),
-            Position = UDim2.new(0.5, -62, 0, 9),
-        })
-        local pillTweenOut = TweenService:Create(pillButton, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 120, 0, 32),
-            Position = UDim2.new(0.5, -60, 0, 10),
-        })
-        
-        pillButton.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch then pillTweenIn:Play() end
-        end)
-        pillButton.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch then
-                pillTweenOut:Play()
-                if main then main.Visible = not main.Visible end
-            end
-        end)
-    else
-        pillButton.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch and main then
-                main.Visible = not main.Visible
-            end
-        end)
-    end
+    -- Simple tap detection without complex dragging for reliability
+    pillButton.MouseButton1Click:Connect(function()
+        if main then
+            main.Visible = not main.Visible
+        end
+    end)
 end
 
 -- ==================== MAIN GUI ====================
-local baseW = (isMobile and 360 or 350) * guiMul
-local baseH = (isMobile and 520 or 480) * guiMul
+local baseW = math.floor((isMobile and 370 or 350) * guiMul)
+local baseH = math.floor((isMobile and 540 or 500) * guiMul)
 
 main = Instance.new("Frame")
 main.Name = "Main"
@@ -191,8 +173,9 @@ mainCorner.CornerRadius = UDim.new(0, 6)
 mainCorner.Parent = main
 
 -- Top bar
+local topBarH = math.floor((isMobile and 44 or 34) * guiMul)
 local topBar = Instance.new("Frame")
-topBar.Size = UDim2.new(1, 0, 0, (isMobile and 44 or 34) * guiMul)
+topBar.Size = UDim2.new(1, 0, 0, topBarH)
 topBar.BackgroundColor3 = currentTheme.TopBar
 topBar.BorderSizePixel = 0
 topBar.Parent = main
@@ -212,21 +195,22 @@ local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(0, 200, 1, 0)
 titleLabel.Position = UDim2.new(0, 14, 0, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "ND SCRIPT v1.4"
+titleLabel.Text = "ND SCRIPT v1.4.1"
 titleLabel.TextColor3 = currentTheme.Accent
-titleLabel.TextSize = (isMobile and 15 or 13) * guiMul
+titleLabel.TextSize = math.floor((isMobile and 15 or 13) * guiMul)
 titleLabel.Font = Enum.Font.SourceSansBold
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.Parent = topBar
 
+local closeSize = math.floor((isMobile and 34 or 26) * guiMul)
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, (isMobile and 34 or 26) * guiMul, 0, (isMobile and 34 or 26) * guiMul)
-closeBtn.Position = UDim2.new(1, -(isMobile and 38 or 30) * guiMul, 0, (isMobile and 5 or 4) * guiMul)
+closeBtn.Size = UDim2.new(0, closeSize, 0, closeSize)
+closeBtn.Position = UDim2.new(1, -(closeSize + 6), 0, math.floor((topBarH - closeSize) / 2))
 closeBtn.BackgroundColor3 = currentTheme.Button
 closeBtn.BorderSizePixel = 0
-closeBtn.Text = "✕"
+closeBtn.Text = "X"
 closeBtn.TextColor3 = currentTheme.Accent
-closeBtn.TextSize = (isMobile and 16 or 12) * guiMul
+closeBtn.TextSize = math.floor((isMobile and 16 or 12) * guiMul)
 closeBtn.Font = Enum.Font.SourceSansBold
 closeBtn.AutoButtonColor = false
 closeBtn.Parent = topBar
@@ -235,24 +219,16 @@ local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0, 4)
 closeCorner.Parent = closeBtn
 
-if settings.animations then
-    closeBtn.MouseEnter:Connect(function()
-        TweenService:Create(closeBtn, TweenInfo.new(0.1), {BackgroundColor3 = currentTheme.Accent, TextColor3 = currentTheme.Main}):Play()
-    end)
-    closeBtn.MouseLeave:Connect(function()
-        TweenService:Create(closeBtn, TweenInfo.new(0.1), {BackgroundColor3 = currentTheme.Button, TextColor3 = currentTheme.Accent}):Play()
-    end)
-end
-
 closeBtn.MouseButton1Click:Connect(function()
     shutdown()
     gui:Destroy()
 end)
 
--- Tab buttons (8 tabs)
+-- Tab buttons - FIXED for mobile
+local tabH = math.floor((isMobile and 40 or 30) * guiMul)
 local tabFrame = Instance.new("Frame")
-tabFrame.Size = UDim2.new(1, 0, 0, (isMobile and 36 or 28) * guiMul)
-tabFrame.Position = UDim2.new(0, 0, 0, (isMobile and 44 or 34) * guiMul)
+tabFrame.Size = UDim2.new(1, 0, 0, tabH)
+tabFrame.Position = UDim2.new(0, 0, 0, topBarH)
 tabFrame.BackgroundColor3 = currentTheme.TabBg
 tabFrame.BorderSizePixel = 0
 tabFrame.Parent = main
@@ -264,11 +240,11 @@ tabHighlight.BackgroundColor3 = currentTheme.Accent
 tabHighlight.BorderSizePixel = 0
 tabHighlight.Parent = tabFrame
 
--- Page system
+-- Pages
 local function createPage()
     local page = Instance.new("Frame")
-    page.Size = UDim2.new(1, 0, 1, -(tabFrame.Size.Y.Offset + 2))
-    page.Position = UDim2.new(0, 0, 0, tabFrame.Size.Y.Offset + 2)
+    page.Size = UDim2.new(1, 0, 1, -(topBarH + tabH + 2))
+    page.Position = UDim2.new(0, 0, 0, topBarH + tabH + 2)
     page.BackgroundTransparency = 1
     page.Visible = false
     page.Parent = main
@@ -278,7 +254,6 @@ end
 local pages = {}
 local tabBtns = {}
 local tabNames = {"FLY", "AIM", "VISUAL", "MM2", "EXEC", "EXT", "OTHER", "SET"}
-local currentTab = 1
 
 for i = 1, #tabNames do
     pages[i] = createPage()
@@ -290,41 +265,43 @@ local function switchTab(index)
     for _, b in pairs(tabBtns) do b.TextColor3 = currentTheme.Text end
     pages[index].Visible = true
     tabBtns[index].TextColor3 = currentTheme.Accent
-    
-    if settings.animations then
-        TweenService:Create(tabHighlight, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Position = UDim2.new((index-1) * 0.125, 0, 1, -2)
-        }):Play()
-    else
-        tabHighlight.Position = UDim2.new((index-1) * 0.125, 0, 1, -2)
-    end
-    currentTab = index
+    tabHighlight.Position = UDim2.new((index-1) * 0.125, 0, 1, -2)
 end
 
-for i, name in pairs(tabNames) do
+-- FIXED: Tab buttons with proper mobile touch support
+local tabWidth = 0.125
+for i = 1, #tabNames do
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.125, 0, 1, 0)
-    btn.Position = UDim2.new((i-1) * 0.125, 0, 0, 0)
+    btn.Size = UDim2.new(tabWidth, 0, 1, 0)
+    btn.Position = UDim2.new((i-1) * tabWidth, 0, 0, 0)
     btn.BackgroundColor3 = currentTheme.TabBg
     btn.BorderSizePixel = 0
-    btn.Text = name
+    btn.Text = tabNames[i]
     btn.TextColor3 = i == 1 and currentTheme.Accent or currentTheme.Text
-    btn.TextSize = (isMobile and 9 or 7) * guiMul
+    btn.TextSize = math.floor((isMobile and 11 or 8) * guiMul)
     btn.Font = Enum.Font.SourceSansBold
     btn.AutoButtonColor = false
+    btn.Active = true
+    btn.Selectable = true
+    btn.ZIndex = 10
     btn.Parent = tabFrame
-    btn.MouseButton1Click:Connect(function() switchTab(i) end)
+    
+    -- Use MouseButton1Click for reliable mobile taps
+    btn.MouseButton1Click:Connect(function()
+        switchTab(i)
+    end)
+    
     table.insert(tabBtns, btn)
 end
 
--- Scroller function
+-- Scrollers
 local function makeScroller(parent)
     local sc = Instance.new("ScrollingFrame")
     sc.Size = UDim2.new(1, 0, 1, 0)
     sc.BackgroundTransparency = 1
-    sc.ScrollBarThickness = (isMobile and 6 or 3) * guiMul
+    sc.ScrollBarThickness = math.floor((isMobile and 8 or 4) * guiMul)
     sc.ScrollBarImageColor3 = currentTheme.Accent
-    sc.CanvasSize = UDim2.new(0, 0, 0, 1500)
+    sc.CanvasSize = UDim2.new(0, 0, 0, 2000)
     sc.ScrollingDirection = Enum.ScrollingDirection.Y
     sc.Parent = parent
     return sc
@@ -335,13 +312,13 @@ for i = 1, #tabNames do
     scrollers[i] = makeScroller(pages[i])
 end
 
--- Size calculations
-local btnH = (isMobile and 38 or 30) * btnMul
-local lblH = (isMobile and 20 or 16) * guiMul
-local sliderH = (isMobile and 46 or 34) * guiMul
-local txtSize = (isMobile and 13 or 11) * guiMul
-local smallTxt = (isMobile and 11 or 9) * guiMul
-local gap = (isMobile and 6 or 4) * guiMul
+-- Sizes
+local btnH = math.floor((isMobile and 40 or 32) * btnMul)
+local lblH = math.floor((isMobile and 22 or 18) * guiMul)
+local sliderH = math.floor((isMobile and 48 or 36) * guiMul)
+local txtSize = math.floor((isMobile and 14 or 12) * guiMul)
+local smallTxt = math.floor((isMobile and 12 or 10) * guiMul)
+local gap = math.floor((isMobile and 8 or 5) * guiMul)
 
 -- Notification
 function notify(msg)
@@ -351,13 +328,13 @@ function notify(msg)
         end
         local n = Instance.new("TextLabel")
         n.Name = "Notif"
-        n.Size = UDim2.new(0, 200 * guiMul, 0, (isMobile and 26 or 20) * guiMul)
-        n.Position = UDim2.new(0.5, -100 * guiMul, 0, -40)
+        n.Size = UDim2.new(0, math.floor(200 * guiMul), 0, math.floor((isMobile and 28 or 22) * guiMul))
+        n.Position = UDim2.new(0.5, math.floor(-100 * guiMul), 0, -40)
         n.BackgroundColor3 = currentTheme.TopBar
         n.BorderSizePixel = 0
         n.Text = msg
         n.TextColor3 = currentTheme.Accent
-        n.TextSize = (isMobile and 11 or 9) * guiMul
+        n.TextSize = math.floor((isMobile and 12 or 10) * guiMul)
         n.Font = Enum.Font.SourceSansBold
         n.Parent = main
         n.ZIndex = 10
@@ -372,14 +349,7 @@ function notify(msg)
         stroke.Thickness = 1
         stroke.Parent = n
         
-        if settings.animations then
-            n.BackgroundTransparency = 1
-            n.TextTransparency = 1
-            TweenService:Create(n, TweenInfo.new(0.2), {BackgroundTransparency = 0, TextTransparency = 0}):Play()
-            wait(2)
-            TweenService:Create(n, TweenInfo.new(0.3), {BackgroundTransparency = 1, TextTransparency = 1}):Play()
-        end
-        wait(2.3)
+        wait(2)
         n:Destroy()
     end)
 end
@@ -392,8 +362,8 @@ end
 -- UI Components
 local function addSection(sc, text, y)
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, -20 * guiMul, 0, lblH + 6)
-    container.Position = UDim2.new(0, 10 * guiMul, 0, y)
+    container.Size = UDim2.new(1, math.floor(-20 * guiMul), 0, lblH + 6)
+    container.Position = UDim2.new(0, math.floor(10 * guiMul), 0, y)
     container.BackgroundTransparency = 1
     container.Parent = sc
     
@@ -419,10 +389,12 @@ end
 local function addToggle(sc, text, y, callback)
     local state = false
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, -20 * guiMul, 0, btnH)
-    container.Position = UDim2.new(0, 10 * guiMul, 0, y)
+    container.Size = UDim2.new(1, math.floor(-20 * guiMul), 0, btnH)
+    container.Position = UDim2.new(0, math.floor(10 * guiMul), 0, y)
     container.BackgroundColor3 = currentTheme.Button
     container.BorderSizePixel = 0
+    container.Active = true
+    container.Selectable = true
     container.Parent = sc
     
     local containerCorner = Instance.new("UICorner")
@@ -430,8 +402,8 @@ local function addToggle(sc, text, y, callback)
     containerCorner.Parent = container
     
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0, 180 * guiMul, 1, 0)
-    label.Position = UDim2.new(0, 10 * guiMul, 0, 0)
+    label.Size = UDim2.new(0, math.floor(180 * guiMul), 1, 0)
+    label.Position = UDim2.new(0, math.floor(10 * guiMul), 0, 0)
     label.BackgroundTransparency = 1
     label.Text = text
     label.TextColor3 = currentTheme.ButtonText
@@ -441,8 +413,8 @@ local function addToggle(sc, text, y, callback)
     label.Parent = container
     
     local toggleBg = Instance.new("Frame")
-    toggleBg.Size = UDim2.new(0, 36 * guiMul, 0, 20 * guiMul)
-    toggleBg.Position = UDim2.new(1, -46 * guiMul, 0.5, -10 * guiMul)
+    toggleBg.Size = UDim2.new(0, math.floor(40 * guiMul), 0, math.floor(22 * guiMul))
+    toggleBg.Position = UDim2.new(1, math.floor(-50 * guiMul), 0.5, math.floor(-11 * guiMul))
     toggleBg.BackgroundColor3 = currentTheme.ToggleBg
     toggleBg.BorderSizePixel = 0
     toggleBg.Parent = container
@@ -452,8 +424,8 @@ local function addToggle(sc, text, y, callback)
     toggleCorner.Parent = toggleBg
     
     local toggleDot = Instance.new("Frame")
-    toggleDot.Size = UDim2.new(0, 16 * guiMul, 0, 16 * guiMul)
-    toggleDot.Position = UDim2.new(0, 2, 0.5, -8 * guiMul)
+    toggleDot.Size = UDim2.new(0, math.floor(18 * guiMul), 0, math.floor(18 * guiMul))
+    toggleDot.Position = UDim2.new(0, 2, 0.5, math.floor(-9 * guiMul))
     toggleDot.BackgroundColor3 = currentTheme.Accent
     toggleDot.BorderSizePixel = 0
     toggleDot.Parent = toggleBg
@@ -462,26 +434,22 @@ local function addToggle(sc, text, y, callback)
     dotCorner.CornerRadius = UDim.new(1, 0)
     dotCorner.Parent = toggleDot
     
-    local function toggle(on)
+    local function toggleUI(on)
         state = on
-        if settings.animations then
-            local dotTarget = on and UDim2.new(1, -18 * guiMul, 0.5, -8 * guiMul) or UDim2.new(0, 2, 0.5, -8 * guiMul)
-            local dotColor = on and currentTheme.Main or currentTheme.Accent
-            local bgColor = on and currentTheme.Accent or currentTheme.ToggleBg
-            TweenService:Create(toggleDot, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
-                Position = dotTarget, BackgroundColor3 = dotColor
-            }):Play()
-            TweenService:Create(toggleBg, TweenInfo.new(0.15), {BackgroundColor3 = bgColor}):Play()
+        if on then
+            toggleDot.Position = UDim2.new(1, math.floor(-20 * guiMul), 0.5, math.floor(-9 * guiMul))
+            toggleDot.BackgroundColor3 = currentTheme.Main
+            toggleBg.BackgroundColor3 = currentTheme.Accent
         else
-            toggleDot.Position = on and UDim2.new(1, -18 * guiMul, 0.5, -8 * guiMul) or UDim2.new(0, 2, 0.5, -8 * guiMul)
-            toggleDot.BackgroundColor3 = on and currentTheme.Main or currentTheme.Accent
-            toggleBg.BackgroundColor3 = on and currentTheme.Accent or currentTheme.ToggleBg
+            toggleDot.Position = UDim2.new(0, 2, 0.5, math.floor(-9 * guiMul))
+            toggleDot.BackgroundColor3 = currentTheme.Accent
+            toggleBg.BackgroundColor3 = currentTheme.ToggleBg
         end
     end
     
     container.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            toggle(not state)
+            toggleUI(not state)
             callback(not state)
         end
     end)
@@ -491,8 +459,8 @@ local sliderDragging = false
 
 local function addSlider(sc, text, min, max, default, y, callback)
     local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, -20 * guiMul, 0, lblH)
-    lbl.Position = UDim2.new(0, 10 * guiMul, 0, y)
+    lbl.Size = UDim2.new(1, math.floor(-20 * guiMul), 0, lblH)
+    lbl.Position = UDim2.new(0, math.floor(10 * guiMul), 0, y)
     lbl.BackgroundTransparency = 1
     lbl.Text = text .. ": " .. default
     lbl.TextColor3 = currentTheme.Text
@@ -502,14 +470,14 @@ local function addSlider(sc, text, min, max, default, y, callback)
     lbl.Parent = sc
 
     local barBg = Instance.new("Frame")
-    barBg.Size = UDim2.new(1, -20 * guiMul, 0, (isMobile and 28 or 22) * guiMul)
-    barBg.Position = UDim2.new(0, 10 * guiMul, 0, y + lblH + 2)
+    barBg.Size = UDim2.new(1, math.floor(-20 * guiMul), 0, math.floor((isMobile and 30 or 24) * guiMul))
+    barBg.Position = UDim2.new(0, math.floor(10 * guiMul), 0, y + lblH + 2)
     barBg.BackgroundTransparency = 1
     barBg.Parent = sc
 
     local bar = Instance.new("Frame")
-    bar.Size = UDim2.new(1, 0, 0, (isMobile and 8 or 4) * guiMul)
-    bar.Position = UDim2.new(0, 0, 0, (isMobile and 10 or 9) * guiMul)
+    bar.Size = UDim2.new(1, 0, 0, math.floor((isMobile and 10 or 5) * guiMul))
+    bar.Position = UDim2.new(0, 0, 0, math.floor((isMobile and 10 or 9) * guiMul))
     bar.BackgroundColor3 = currentTheme.ToggleBg
     bar.BorderSizePixel = 0
     bar.Parent = barBg
@@ -562,8 +530,8 @@ end
 
 local function addButton(sc, text, y, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -20 * guiMul, 0, btnH)
-    btn.Position = UDim2.new(0, 10 * guiMul, 0, y)
+    btn.Size = UDim2.new(1, math.floor(-20 * guiMul), 0, btnH)
+    btn.Position = UDim2.new(0, math.floor(10 * guiMul), 0, y)
     btn.BackgroundColor3 = currentTheme.Button
     btn.BorderSizePixel = 0
     btn.Text = text
@@ -571,28 +539,22 @@ local function addButton(sc, text, y, callback)
     btn.TextSize = txtSize
     btn.Font = Enum.Font.SourceSansBold
     btn.AutoButtonColor = false
+    btn.Active = true
+    btn.Selectable = true
     btn.Parent = sc
     
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 4)
     corner.Parent = btn
     
-    if settings.animations then
-        btn.MouseEnter:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3 = currentTheme.Accent, TextColor3 = currentTheme.Main}):Play()
-        end)
-        btn.MouseLeave:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3 = currentTheme.Button, TextColor3 = currentTheme.ButtonText}):Play()
-        end)
-    end
     btn.MouseButton1Click:Connect(callback)
     return btn
 end
 
 local function addTextBox(sc, placeholder, y)
     local box = Instance.new("TextBox")
-    box.Size = UDim2.new(1, -20 * guiMul, 0, btnH)
-    box.Position = UDim2.new(0, 10 * guiMul, 0, y)
+    box.Size = UDim2.new(1, math.floor(-20 * guiMul), 0, btnH)
+    box.Position = UDim2.new(0, math.floor(10 * guiMul), 0, y)
     box.BackgroundColor3 = currentTheme.Button
     box.BorderSizePixel = 0
     box.Text = ""
@@ -601,6 +563,7 @@ local function addTextBox(sc, placeholder, y)
     box.PlaceholderColor3 = currentTheme.Text
     box.TextSize = txtSize
     box.Font = Enum.Font.SourceSans
+    box.ClearTextOnFocus = false
     box.Parent = sc
     
     local corner = Instance.new("UICorner")
@@ -929,10 +892,6 @@ local function freezeChar() local char = LocalPlayer.Character; if not char then
 local function crashServer() notify("Crashing..."); spawn(function() for i = 1, 500 do pcall(function() local p = Instance.new("Part"); p.Size = Vector3.new(10,10,10); p.Position = Vector3.new(math.random(-100,100), math.random(0,50), math.random(-100,100)); p.Anchored = true; p.Parent = Workspace end) end end) end
 local function lagServer() notify("Lagging..."); spawn(function() for i = 1, 1000 do pcall(function() local s = Instance.new("Sound"); s.SoundId = "rbxassetid://0"; s.Volume = 10; s.Parent = Workspace end) end end) end
 
--- ==================== EXECUTOR ====================
-local scriptStorage = {}
-local currentScriptIndex = 0
-
 -- ==================== YOUTUBE MUSIC ====================
 local musicSound = nil
 
@@ -980,7 +939,7 @@ end
 
 -- ==================== BUILD UI ====================
 
--- FLY TAB (index 1)
+-- FLY TAB
 local y = 5
 addSection(scrollers[1], "FLIGHT", y); y = y + lblH + 8
 addToggle(scrollers[1], "Fly", y, function(s) flyEnabled = s; if s then flyStart() else flyStop() end end); y = y + btnH + gap
@@ -992,14 +951,14 @@ addToggle(scrollers[1], "Speed Boost", y, function(s) speedEnabled = s; if s the
 addSlider(scrollers[1], "Walk Speed", 16, 200, 50, y, function(v) speedVal = v; if speedEnabled then pcall(function() local char = LocalPlayer.Character; if char then local hum = char:FindFirstChild("Humanoid"); if hum then hum.WalkSpeed = v end end end) end end)
 y = y + sliderH + 15; scrollers[1].CanvasSize = UDim2.new(0, 0, 0, y)
 
--- AIM TAB (index 2)
+-- AIM TAB
 y = 5
 addSection(scrollers[2], "AIMBOT", y); y = y + lblH + 8
 addToggle(scrollers[2], "Aimbot", y, function(s) aimbotEnabled = s; if s then aimbotStart() else aimbotStop() end end); y = y + btnH + gap
 addSlider(scrollers[2], "FOV", 50, 500, 200, y, function(v) aimbotFov = v; aimbotUpdateCircle() end); y = y + sliderH + gap
 addSlider(scrollers[2], "Smooth", 1, 30, 5, y, function(v) aimbotSmooth = v end); y = y + sliderH + gap
 addToggle(scrollers[2], "Wall Check", y, function(s) aimbotWallCheck = s end); y = y + btnH + gap
-addSection(scrollers[2], "TARGET PART", y); y = y + lblH + 8
+addSection(scrollers[2], "TARGET", y); y = y + lblH + 8
 local targetParts = {"Head", "Torso", "Legs"}
 for idx, partName in pairs(targetParts) do
     local pb = Instance.new("TextButton")
@@ -1007,18 +966,19 @@ for idx, partName in pairs(targetParts) do
     pb.BackgroundColor3 = partName == aimbotTargetPart and currentTheme.Accent or currentTheme.Button
     pb.BorderSizePixel = 0; pb.Text = partName
     pb.TextColor3 = partName == aimbotTargetPart and currentTheme.Main or currentTheme.ButtonText
-    pb.TextSize = smallTxt - 1; pb.Font = Enum.Font.SourceSansBold; pb.AutoButtonColor = false; pb.Parent = scrollers[2]
+    pb.TextSize = smallTxt - 1; pb.Font = Enum.Font.SourceSansBold; pb.AutoButtonColor = false
+    pb.Active = true; pb.Selectable = true; pb.Parent = scrollers[2]
     local pc = Instance.new("UICorner"); pc.CornerRadius = UDim.new(0, 4); pc.Parent = pb
     pb.MouseButton1Click:Connect(function()
         aimbotTargetPart = partName
         for _, c in pairs(scrollers[2]:GetChildren()) do if c:IsA("TextButton") and inTable(targetParts, c.Text) then
-            TweenService:Create(c, TweenInfo.new(0.15), {BackgroundColor3 = currentTheme.Button, TextColor3 = currentTheme.ButtonText}):Play() end end
-        TweenService:Create(pb, TweenInfo.new(0.15), {BackgroundColor3 = currentTheme.Accent, TextColor3 = currentTheme.Main}):Play()
+            c.BackgroundColor3 = currentTheme.Button; c.TextColor3 = currentTheme.ButtonText end end
+        pb.BackgroundColor3 = currentTheme.Accent; pb.TextColor3 = currentTheme.Main
     end)
 end
 y = y + btnH + gap + 15; scrollers[2].CanvasSize = UDim2.new(0, 0, 0, y)
 
--- VISUALS TAB (index 3)
+-- VISUALS TAB
 y = 5
 addSection(scrollers[3], "FAKE BADGE", y); y = y + lblH + 8
 addToggle(scrollers[3], "Fake Badge", y, function(s) if s then startFakeBadge() else stopFakeBadge() end end); y = y + btnH + gap
@@ -1029,13 +989,14 @@ for idx, badgeName in pairs(badgeTypes) do
     bb.BackgroundColor3 = badgeName == fakeBadgeType and currentTheme.Accent or currentTheme.Button
     bb.BorderSizePixel = 0; bb.Text = badgeName
     bb.TextColor3 = badgeName == fakeBadgeType and currentTheme.Main or currentTheme.ButtonText
-    bb.TextSize = smallTxt - 1; bb.Font = Enum.Font.SourceSansBold; bb.AutoButtonColor = false; bb.Parent = scrollers[3]
+    bb.TextSize = smallTxt - 1; bb.Font = Enum.Font.SourceSansBold; bb.AutoButtonColor = false
+    bb.Active = true; bb.Selectable = true; bb.Parent = scrollers[3]
     local bc = Instance.new("UICorner"); bc.CornerRadius = UDim.new(0, 4); bc.Parent = bb
     bb.MouseButton1Click:Connect(function()
         setBadgeType(badgeName)
         for _, c in pairs(scrollers[3]:GetChildren()) do if c:IsA("TextButton") and inTable(badgeTypes, c.Text) then
-            TweenService:Create(c, TweenInfo.new(0.15), {BackgroundColor3 = currentTheme.Button, TextColor3 = currentTheme.ButtonText}):Play() end end
-        TweenService:Create(bb, TweenInfo.new(0.15), {BackgroundColor3 = currentTheme.Accent, TextColor3 = currentTheme.Main}):Play()
+            c.BackgroundColor3 = currentTheme.Button; c.TextColor3 = currentTheme.ButtonText end end
+        bb.BackgroundColor3 = currentTheme.Accent; bb.TextColor3 = currentTheme.Main
     end)
 end
 y = y + btnH + gap
@@ -1046,7 +1007,7 @@ addSection(scrollers[3], "PLAYER ESP", y); y = y + lblH + 8
 addToggle(scrollers[3], "ESP", y, function(s) espEnabled = s; if s then espStart() else espStop() end end); y = y + btnH + 15
 scrollers[3].CanvasSize = UDim2.new(0, 0, 0, y)
 
--- MM2 TAB (index 4)
+-- MM2 TAB
 y = 5
 addSection(scrollers[4], "MM2 ESP", y); y = y + lblH + 8
 addToggle(scrollers[4], "MM2 ESP", y, function(s) mm2espEnabled = s; if s then mm2espStart() else mm2espStop() end end); y = y + btnH + gap
@@ -1063,12 +1024,12 @@ for _, info in pairs(roleInfo) do
 end
 y = y + 15; scrollers[4].CanvasSize = UDim2.new(0, 0, 0, y)
 
--- EXECUTOR TAB (index 5)
+-- EXECUTOR TAB
 y = 5
 addSection(scrollers[5], "BUILT-IN EXECUTOR", y); y = y + lblH + 8
-
-local scriptBox = addTextBox(scrollers[5], "Paste script here...", y); scriptBox.Size = UDim2.new(1, -20 * guiMul, 0, btnH * 3)
-scriptBox.TextYAlignment = Enum.TextYAlignment.Top; scriptBox.MultiLine = true; scriptBox.ClearTextOnFocus = false
+local scriptBox = addTextBox(scrollers[5], "Paste script here...", y)
+scriptBox.Size = UDim2.new(1, math.floor(-20 * guiMul), 0, btnH * 3)
+scriptBox.TextYAlignment = Enum.TextYAlignment.Top; scriptBox.MultiLine = true
 y = y + btnH * 3 + gap
 
 local function executeScript()
@@ -1079,72 +1040,39 @@ local function executeScript()
 end
 
 local function clearScript() scriptBox.Text = ""; notify("Cleared!") end
-local function pasteScript()
-    pcall(function() scriptBox.Text = getclipboard() end)
-    notify("Pasted!")
-end
-local function copyScript()
-    pcall(function() setclipboard(scriptBox.Text) end)
-    notify("Copied!")
-end
+local function pasteScript() pcall(function() scriptBox.Text = getclipboard() end); notify("Pasted!") end
+local function copyScript() pcall(function() setclipboard(scriptBox.Text) end); notify("Copied!") end
 
 addButton(scrollers[5], "EXECUTE", y, executeScript); y = y + btnH + gap
 addButton(scrollers[5], "CLEAR", y, clearScript); y = y + btnH + gap
 addButton(scrollers[5], "PASTE", y, pasteScript); y = y + btnH + gap
 addButton(scrollers[5], "COPY", y, copyScript); y = y + btnH + gap
-
 addSection(scrollers[5], "SAVED SCRIPTS", y); y = y + lblH + 8
-addButton(scrollers[5], "+ NEW SCRIPT", y, function()
-    scriptBox.Text = ""
-    notify("New script created!")
-end)
-y = y + btnH + gap
-
--- Show saved scripts (max 5 buttons for demo)
+addButton(scrollers[5], "+ NEW SCRIPT", y, function() scriptBox.Text = ""; notify("New script!") end); y = y + btnH + gap
 for i = 1, 5 do
     local sName = "Script " .. i
-    addButton(scrollers[5], sName, y, function()
-        scriptBox.Text = "-- " .. sName .. "\nprint('Hello from ND Script!')"
-        notify("Loaded: " .. sName)
-    end)
+    addButton(scrollers[5], sName, y, function() scriptBox.Text = "-- " .. sName .. "\nprint('ND Script!')"; notify("Loaded: " .. sName) end)
     y = y + btnH + gap
 end
 y = y + 15; scrollers[5].CanvasSize = UDim2.new(0, 0, 0, y)
 
--- EXTERNAL TAB (index 6)
+-- EXTERNAL TAB
 y = 5
 addSection(scrollers[6], "EXTERNAL SCRIPTS", y); y = y + lblH + 8
-addButton(scrollers[6], "INFINITE YIELD", y, function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-    notify("Infinite Yield loaded!")
-end); y = y + btnH + gap
-addButton(scrollers[6], "DEX EXPLORER", y, function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
-    notify("Dex Explorer loaded!")
-end); y = y + btnH + gap
-addButton(scrollers[6], "SIMPLE SPY", y, function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/exxprt/SimpleSpy/main/SimpleSpy.lua"))()
-    notify("Simple Spy loaded!")
-end); y = y + btnH + gap
-addButton(scrollers[6], "REMOTE SPY", y, function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpy.lua"))()
-    notify("Remote Spy loaded!")
-end); y = y + btnH + gap
-addButton(scrollers[6], "DARK DEX", y, function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/DarkDexV3.lua"))()
-    notify("Dark Dex loaded!")
-end); y = y + btnH + 15
+addButton(scrollers[6], "INFINITE YIELD", y, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))(); notify("Loaded!") end); y = y + btnH + gap
+addButton(scrollers[6], "DEX EXPLORER", y, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))(); notify("Loaded!") end); y = y + btnH + gap
+addButton(scrollers[6], "SIMPLE SPY", y, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/exxprt/SimpleSpy/main/SimpleSpy.lua"))(); notify("Loaded!") end); y = y + btnH + gap
+addButton(scrollers[6], "DARK DEX", y, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/DarkDexV3.lua"))(); notify("Loaded!") end); y = y + btnH + 15
 scrollers[6].CanvasSize = UDim2.new(0, 0, 0, y)
 
--- OTHERS TAB (index 7)
+-- OTHERS TAB
 y = 5
 addSection(scrollers[7], "YOUTUBE MUSIC", y); y = y + lblH + 8
-local musicBox = addTextBox(scrollers[7], "rbxassetid://ID or YouTube URL", y); y = y + btnH + gap
+local musicBox = addTextBox(scrollers[7], "rbxassetid://ID", y); y = y + btnH + gap
 addButton(scrollers[7], "PLAY", y, function() playMusic(musicBox.Text) end); y = y + btnH + gap
 addButton(scrollers[7], "STOP", y, stopMusic); y = y + btnH + gap
-addButton(scrollers[7], "SET VOLUME 50%", y, function() if musicSound then musicSound.Volume = 0.5; notify("Volume: 50%") end end); y = y + btnH + gap
-addButton(scrollers[7], "SET VOLUME 100%", y, function() if musicSound then musicSound.Volume = 1; notify("Volume: 100%") end end); y = y + btnH + gap
-
+addButton(scrollers[7], "VOLUME 50%", y, function() if musicSound then musicSound.Volume = 0.5; notify("Volume: 50%") end end); y = y + btnH + gap
+addButton(scrollers[7], "VOLUME 100%", y, function() if musicSound then musicSound.Volume = 1; notify("Volume: 100%") end end); y = y + btnH + gap
 addSection(scrollers[7], "TROLLING", y); y = y + lblH + 8
 addButton(scrollers[7], "SPIN", y, spinChar); y = y + btnH + gap
 addButton(scrollers[7], "FLING", y, flingChar); y = y + btnH + gap
@@ -1154,14 +1082,13 @@ addButton(scrollers[7], "CRASH SERVER", y, crashServer); y = y + btnH + gap
 addButton(scrollers[7], "LAG SERVER", y, lagServer); y = y + btnH + 15
 scrollers[7].CanvasSize = UDim2.new(0, 0, 0, y)
 
--- SETTINGS TAB (index 8)
+-- SETTINGS TAB
 y = 5
 addSection(scrollers[8], "THEMES", y); y = y + lblH + 8
 for themeName, _ in pairs(themes) do
     addButton(scrollers[8], themeName, y, function()
         settings.theme = themeName
         currentTheme = themes[themeName]
-        -- Update all colors
         main.BackgroundColor3 = currentTheme.Main
         mainStroke.Color = currentTheme.Accent
         topBar.BackgroundColor3 = currentTheme.TopBar
@@ -1191,12 +1118,12 @@ end
 addSection(scrollers[8], "GUI SIZE", y); y = y + lblH + 8
 addButton(scrollers[8], "Normal", y, function()
     settings.guiSize = 1; guiMul = 1
-    main.Size = UDim2.new(0, (isMobile and 360 or 350), 0, (isMobile and 520 or 480))
+    main.Size = UDim2.new(0, (isMobile and 370 or 350), 0, (isMobile and 540 or 500))
     notify("GUI: Normal")
 end); y = y + btnH + gap
 addButton(scrollers[8], "Large", y, function()
     settings.guiSize = 2; guiMul = 1.2
-    main.Size = UDim2.new(0, (isMobile and 360 or 350) * 1.2, 0, (isMobile and 520 or 480) * 1.2)
+    main.Size = UDim2.new(0, math.floor((isMobile and 370 or 350) * 1.2), 0, math.floor((isMobile and 540 or 500) * 1.2))
     notify("GUI: Large")
 end); y = y + btnH + gap
 
@@ -1204,4 +1131,4 @@ addSection(scrollers[8], "ANIMATIONS", y); y = y + lblH + 8
 addToggle(scrollers[8], "Animations", y, function(s) settings.animations = s; notify("Animations: " .. (s and "ON" or "OFF")) end); y = y + btnH + 15
 scrollers[8].CanvasSize = UDim2.new(0, 0, 0, y)
 
-notify("ND Script v1.4 loaded!")
+notify("ND Script v1.4.1 loaded!")
